@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<!-- will add: http://fancybox.net/ -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Node Practical Test - William Jiang - upload Image from URL</title>
+<link rel="stylesheet" type="text/css" href="stylesheets/style.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script src="http://malsup.github.com/jquery.form.js"></script>
+<script src="/nowjs/now.js"></script>
+<script>
+$(document).ready(function() {
+
+	now.receiveMessage = function(message){
+		$(message).addClass('img_space').appendTo('div.display');
+	}
+
+	$('#uploadForm').submit(function() {
+		var str = $('#userPhotoInput').val();
+		if(str=='' || /^\s+$/.test(str)) {
+			status('Error: please input full URL!');
+			$('#userPhotoInput').focus();
+			return false;
+		}
+		//var expr1 = /[-a-zA-Z0-9@:%_\+.~#?&\/=]{2,}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&\/=]*)?/gi;
+		var expr1 = /(http|https|ftp):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/gi;
+		var re1 = new RegExp(expr1);
+		if(! str.match(re1)) {
+			status('Error: please input a correct URL');
+			$('#userPhotoInput').select().focus();
+			return false;
+		}
+		var expr2 = /\.(gif|jpg|jpeg|png|ico|bmp)$/gi;
+		var re2 = new RegExp(expr2);
+		if(! str.match(re2)) {
+			status('Error: please input a correct image file.');
+			$('#userPhotoInput').select().focus();
+			return false;
+		}
+		$('#status').fadeOut(100);
+		
+		$(this).ajaxSubmit({
+			error: function(xhr) {
+				status('Error: ' + xhr.status);
+			},
+			
+			success: function(response) {
+				if(response.error) {
+					status(response.error);
+					return;
+				}
+				var imageUrlOnServer = response.path;
+				var img = '<img src="/images/'+imageUrlOnServer+'" title="'+imageUrlOnServer+'" />';
+				// fresh all online pages.
+				now.distributeMessage(img);
+			}
+		});
+		return false;
+	});
+	
+	function status(message) {
+		$('#status').addClass('warning').text(message).fadeIn(100);
+	}	
+});
+</script>
+</head>
+<body>
+<div class="box">
+  <h2>Image Stream</h2>
+  <hr />
+  <p>In the field, input the full URL to your image. You can use the 'Post Image' button to upload it.</p>
+  <div class="main">
+    <form action="/api/photos" method="post" id="uploadForm">
+      <p>Examples: http://localhost:3001/images1/ajax-loader2.gif,http://localhost:3001/images1/02.png</p>
+      <input type="text" name="userPhotoInput" id="userPhotoInput" placeholder="specify image URL...." data-prompt-position="topLeft" autocomplete="on" size="50" />
+      <input type="submit" value="Post Image" />
+    </form>
+    <div id="status"> </div>
+    <div class="display"></div>
+  </div>
+</div>
+</body>
+</html>

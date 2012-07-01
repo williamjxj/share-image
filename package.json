@@ -1,0 +1,10 @@
+{
+    "name": "upload-images"
+  , "description": "Node Practical Test - William Jiang - upload Image from URL"
+  , "version": "1.0.0"
+  , "private": true
+  , "dependencies": {
+      "express": "2.5.8"
+    , "jade": ">= 0.0.1"
+  }
+}

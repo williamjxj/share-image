@@ -6,9 +6,15 @@ var my_dir = __dirname+'/public/images/';
 var express = require('express'), 
 	routes = require('./routes'),
 	request = require('request'),
-	fs = require('fs');
+	fs = require('fs'),
+	mongoose = require('mongoose');
+
+require('./upimage');
 
 var app = module.exports = express.createServer();
+
+var Image = mongoose.model('YouAdWorld');
+var image = new Image();
 
 // Configuration
 app.configure(function(){
@@ -41,9 +47,21 @@ app.post('/api/photos', function(req, res) {
 	// stream response to a file stream.
 	var serverPath = req.body.userPhotoInput.replace(/.*\//, '');
 	var path = my_dir + serverPath;
-	console.log(path);
-	console.log(serverPath);
-	
+
+	// path: /home/william/projects/share-image/public/images/Canada_Day-2012hp.jpg
+	//serverPath: Canada_Day-2012hp.jpg
+
+
+	image.name = req.body.userPhotoInput;
+	//image.size = 
+	//image.type = 
+	//image.modifed = 
+
+	image.save(function(err, res) {
+		if(err) { throw err; }
+		console.log(res);
+	});
+
 	var ws = fs.createWriteStream(path);
 
 	// request(uri, options, callback)
@@ -55,6 +73,12 @@ app.post('/api/photos', function(req, res) {
 			res.send({ error: 'No such image file!' });
 		}
 	}).pipe(ws);
+
+
+  Image.find({}, function(err, docs) {
+	  console.log(docs);
+		mongoose.disconnect();
+  });
 
 });
 

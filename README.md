@@ -3,6 +3,7 @@ share-image
 
 share web images among computers by using nodejs
 
+<pre>
 1. install nodejs, npm.
 
 2. 
@@ -23,3 +24,4 @@ $ node app.js
 6. then go to http://localhost:3001
 
 that's it!
+</pre>

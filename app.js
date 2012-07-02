@@ -35,11 +35,8 @@ app.configure('production', function(){
 });
 
 
-// Routes
-app.get('/', function(req, res){
-	var html = fs.readFileSync(__dirname+'/public/index.html');
-	res.end(html);
-});
+
+
 
 app.post('/api/photos', function(req, res) {
 	console.log(JSON.stringify(req.body));
@@ -53,13 +50,11 @@ app.post('/api/photos', function(req, res) {
 
 
 	image.name = req.body.userPhotoInput;
-	//image.size = 
-	//image.type = 
-	//image.modifed = 
 
 	image.save(function(err, res) {
 		if(err) { throw err; }
 		console.log(res);
+		//mongoose.disconnect();
 	});
 
 	var ws = fs.createWriteStream(path);
@@ -75,11 +70,48 @@ app.post('/api/photos', function(req, res) {
 	}).pipe(ws);
 
 
-  Image.find({}, function(err, docs) {
-	  console.log(docs);
-		mongoose.disconnect();
-  });
+});
 
+app.get('/list', function(req, res){
+  var query = Image.find({});
+	query.sort('date', 'descending');
+	query.exec(function(err, docs) {
+		if(err) {
+			throw err;
+		}
+	  console.log(docs);
+	  //mongoose.disconnect();
+		res.render('list', {
+			layout: false,
+			locals: {
+				files: docs
+			}
+		})
+	});
+});
+
+
+// Routes
+app.get('/', function(req, res){
+	var html = fs.readFileSync(__dirname+'/public/index.html');
+	res.end(html);
+});
+
+
+app.get('/deletephoto/:id', function(req, res) {
+
+	Image.findById(req.params.id, function(err, img) {
+		console.log(img);
+		img.remove(function(err) {
+			if(!err) {
+				console.log("removed");
+				res.redirect('/list');
+			}
+			else {
+				throw err;
+			}
+		});
+	});
 });
 
 app.listen(3001, function(){
